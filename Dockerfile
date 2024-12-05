@@ -1,24 +1,15 @@
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM python:3.9-slim-buster
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+WORKDIR /code
 
-# Set the working directory
-WORKDIR /app
+COPY ./requirements.txt /code/requirements.txt
 
-# Copy the requirements file to the working directory
-COPY requirements.txt /app/
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends libgl1-mesa-dev libglib2.0-0 && \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir --upgrade -r /code/requirements.txt && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+COPY . /code
 
-# Copy the entire project to the working directory
-COPY . /app/
-
-# Expose the port FastAPI runs on
-EXPOSE 8080
-
-# Command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
